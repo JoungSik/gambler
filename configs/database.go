@@ -9,7 +9,7 @@ import (
 func InitDB(debug bool) (*gorm.DB, error) {
 	config := NewDBConfig(true)
 
-	dsn := config.DB_USER + ":" + config.DB_PASSWORD + "@tcp(" + config.DB_HOST + ":3306)/gambler?charset=utf8mb4"
+	dsn := config.DB_USER + ":" + config.DB_PASSWORD + "@tcp(" + config.DB_HOST + ":3306)/gambler?charset=utf8mb4&parseTime=true"
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

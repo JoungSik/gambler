@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
