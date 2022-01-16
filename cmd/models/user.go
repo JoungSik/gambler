@@ -2,11 +2,14 @@ package models
 
 import "time"
 
+const DEFAULT_AMOUNT = 100000
+
 type User struct {
-	ID        uint `gorm:"primaryKey"`
+	ID        string `gorm:"primaryKey"`
 	Server    string
 	Name      string
 	Amount    int64
+	InitCount int
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
