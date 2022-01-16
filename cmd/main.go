@@ -59,30 +59,47 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	db, err := configs.InitDB(true)
-	if err != nil {
-		fmt.Println("error creating Database session,", err)
-		return
-	}
-
 	if m.Content == "!생성" {
+		db, err := configs.InitDB(true)
+		if err != nil {
+			fmt.Println("error creating Database session,", err)
+			return
+		}
+
 		user := models.User{ID: m.Author.ID, Server: m.GuildID, Name: m.Author.Username, Amount: models.DEFAULT_AMOUNT, InitCount: 0}
 		if result := db.Create(&user); result.Error != nil {
 			s.ChannelMessageSend(m.ChannelID, "이미 생성되었어요!")
+			data, _ := db.DB()
+			data.Close()
 			return
 		}
 		s.ChannelMessageSend(m.ChannelID, "어서오세요! 초기 자본금은 "+strconv.Itoa(models.DEFAULT_AMOUNT)+"입니다!")
+
+		data, _ := db.DB()
+		data.Close()
 	}
 
 	if metched, _ := regexp.MatchString("!도박", m.Content); metched {
+		db, err := configs.InitDB(true)
+		if err != nil {
+			fmt.Println("error creating Database session,", err)
+			data, _ := db.DB()
+			data.Close()
+			return
+		}
+
 		regex, _ := regexp.Compile("[0-9]+$")
 		result, err := strconv.Atoi(regex.FindString(m.Content))
 		if err != nil {
+			data, _ := db.DB()
+			data.Close()
 			return
 		}
 
 		if result < 1000 {
 			s.ChannelMessageSend(m.ChannelID, "최소 배팅금은 1,000부터 입니다!")
+			data, _ := db.DB()
+			data.Close()
 			return
 		}
 
@@ -94,11 +111,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		if origin <= 0 {
 			s.ChannelMessageSend(m.ChannelID, "파산했어요.. ```!파산```으로 회복하세요!")
+			data, _ := db.DB()
+			data.Close()
 			return
 		}
 
 		if origin < int64(result) {
 			s.ChannelMessageSend(m.ChannelID, "욕심쟁이, 소지금보다 배팅금이 크면 못해요!")
+			data, _ := db.DB()
+			data.Close()
 			return
 		}
 
@@ -107,6 +128,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		message := "투자금: " + humanize.Comma(int64(result)) + "\n원금: " + humanize.Comma(origin) + "\n결과: " + humanize.Comma(int64(amount)) + "\n남은 금액: " + humanize.Comma(user.Amount)
 		s.ChannelMessageSend(m.ChannelID, message)
+
+		data, _ := db.DB()
+		data.Close()
 	}
 
 	if m.Content == "!파산" {
@@ -114,6 +138,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if m.Content == "!초기화" {
+		db, err := configs.InitDB(true)
+		if err != nil {
+			fmt.Println("error creating Database session,", err)
+			return
+		}
+
 		var user models.User
 		db.Find(&user, "id = ? AND server = ?", m.Author.ID, m.GuildID)
 		user.Amount = models.DEFAULT_AMOUNT
@@ -121,6 +151,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		db.Save(user)
 
 		s.ChannelMessageSend(m.ChannelID, "당신은 "+humanize.Comma(int64(user.InitCount))+"번 비겁하게 초기화 하셨습니다.")
+
+		data, _ := db.DB()
+		data.Close()
 	}
 
 }
