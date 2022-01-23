@@ -103,8 +103,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		amount := result * generator()
-
 		var user models.User
 		db.Find(&user, "id = ? AND server = ?", m.Author.ID, m.GuildID)
 		origin := user.Amount
@@ -122,6 +120,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			data.Close()
 			return
 		}
+
+		amount := result * generator(origin)
 
 		user.Amount += -int64(result) + int64(amount)
 		db.Save(user)
@@ -158,9 +158,30 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 }
 
-func generator() int {
+func generator(origin int64) int {
+	var items [10]int
 	rand.Seed(time.Now().UnixNano())
-	min := -10
-	max := 5
-	return rand.Intn(max-min+1) + min
+	min, max := 1, 10
+
+	for i := range items {
+		num := 0
+		for num == 0 {
+			num = rand.Intn(max)
+			items[i] = num
+		}
+	}
+
+	switch {
+	case int(origin) >= 100000000:
+		items[0] = items[0] * -1
+		items[2] = items[2] * -1
+		items[4] = items[4] * -1
+		items[6] = items[6] * -1
+		items[8] = items[8] * -1
+	case int(origin) >= 1000000:
+		items[0] = items[0] * -1
+		items[2] = items[2] * -1
+	}
+
+	return items[rand.Intn(max-min)]
 }
