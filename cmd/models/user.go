@@ -6,7 +6,6 @@ const DEFAULT_AMOUNT = 100000
 
 type User struct {
 	ID        string `gorm:"primaryKey"`
-	Server    string
 	Name      string
 	Amount    int64
 	InitCount int
