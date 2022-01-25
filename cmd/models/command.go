@@ -26,6 +26,7 @@ const (
 	Gambling = CommandType("도박")
 	Bankrupt = CommandType("파산")
 	Reset    = CommandType("초기화")
+	All      = CommandType("올인")
 )
 
 func (c *Command) Execute(db *gorm.DB) string {
@@ -70,6 +71,22 @@ func (c *Command) Execute(db *gorm.DB) string {
 		db.Save(user)
 
 		return "당신은 " + humanize.Comma(int64(user.InitCount)) + "번 비겁하게 초기화 하셨습니다."
+	case All:
+		var user User
+		db.Find(&user, "id = ?", author.ID)
+		origin := user.Amount
+		if origin <= 0 {
+			return "파산했어요.. ```!파산```으로 회복하세요!"
+		} else if origin < int64(1000) {
+			return "욕심쟁이, 소지금보다 최소 배팅금이 크면 못해요!"
+		}
+
+		amount := origin * int64(generator(origin))
+
+		user.Amount += -int64(origin) + int64(amount)
+		db.Save(user)
+
+		return "투자금: " + humanize.Comma(int64(origin)) + "\n원금: " + humanize.Comma(origin) + "\n결과: " + humanize.Comma(int64(amount)) + "\n남은 금액: " + humanize.Comma(user.Amount)
 	default:
 		return "not found"
 	}
@@ -80,6 +97,7 @@ func Parse(message string, m *discordgo.MessageCreate) (*Command, error) {
 	gambling, _ := regexp.Compile("!도박")
 	bankrupt, _ := regexp.Compile("!파산")
 	reset, _ := regexp.Compile("!초기화")
+	all, _ := regexp.Compile("!올인")
 
 	var command *Command = nil
 	data, _ := json.Marshal(m.Author)
@@ -97,6 +115,8 @@ func Parse(message string, m *discordgo.MessageCreate) (*Command, error) {
 		command = &Command{Type: Bankrupt, Author: string(data)}
 	case reset.MatchString(message):
 		command = &Command{Type: Reset, Author: string(data)}
+	case all.MatchString(message):
+		command = &Command{Type: All, Author: string(data)}
 	default:
 		return nil, errors.New("unknown command type")
 	}
