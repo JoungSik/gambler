@@ -54,6 +54,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if m.Content == "" {
+		return
+	}
+
 	if m.Content[0] == '!' {
 		db, err := configs.InitDB(false)
 		if err != nil {
