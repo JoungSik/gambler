@@ -55,12 +55,20 @@ func (c *Command) Execute(db *gorm.DB) string {
 			return "욕심쟁이, 소지금보다 배팅금이 크면 못해요!"
 		}
 
-		amount := dividend * generator(origin)
+		num := generator(origin)
+		amount := dividend * num
 
 		user.Amount += -int64(dividend) + int64(amount)
 		db.Save(user)
 
-		return "투자금: " + humanize.Comma(int64(dividend)) + "\n원금: " + humanize.Comma(origin) + "\n결과: " + humanize.Comma(int64(amount)) + "\n남은 금액: " + humanize.Comma(user.Amount)
+		message := "유저: " + user.Name + "\n" +
+			"투자금: " + humanize.Comma(int64(dividend)) + "\n" +
+			"원금: " + humanize.Comma(origin) + "\n" +
+			"결과: " + humanize.Comma(int64(amount)) + "\n" +
+			"남은금액: " + humanize.Comma(user.Amount) + "\n" +
+			"배율: " + strconv.Itoa(num)
+
+		return message
 	case Bankrupt:
 		return "다음 업데이트를 기대해주세요!"
 	case Reset:
@@ -81,12 +89,20 @@ func (c *Command) Execute(db *gorm.DB) string {
 			return "욕심쟁이, 소지금보다 최소 배팅금이 크면 못해요!"
 		}
 
-		amount := origin * int64(generator(origin))
+		num := int64(generator(origin))
+		amount := origin * num
 
 		user.Amount += -int64(origin) + int64(amount)
 		db.Save(user)
 
-		return "투자금: " + humanize.Comma(int64(origin)) + "\n원금: " + humanize.Comma(origin) + "\n결과: " + humanize.Comma(int64(amount)) + "\n남은 금액: " + humanize.Comma(user.Amount)
+		message := "유저: " + user.Name + "\n" +
+			"투자금: " + humanize.Comma(int64(origin)) + "\n" +
+			"원금: " + humanize.Comma(origin) + "\n" +
+			"결과: " + humanize.Comma(int64(amount)) + "\n" +
+			"남은금액: " + humanize.Comma(user.Amount) + "\n" +
+			"배율: " + strconv.FormatInt(num, 10)
+
+		return message
 	default:
 		return "not found"
 	}
