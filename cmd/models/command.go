@@ -48,6 +48,10 @@ func (c *Command) Execute(db *gorm.DB) string {
 
 		var user User
 		db.Find(&user, "id = ?", author.ID)
+		if user.ID == "" {
+			return "```!생성을 먼저 진행해주세요```"
+		}
+
 		origin := user.Amount
 		if origin <= 0 {
 			return "파산했어요.. ```!파산```으로 회복하세요!"
@@ -74,6 +78,10 @@ func (c *Command) Execute(db *gorm.DB) string {
 	case Reset:
 		var user User
 		db.Find(&user, "id = ?", author.ID)
+		if user.ID == "" {
+			return "```!생성을 먼저 진행해주세요```"
+		}
+
 		user.Amount = DEFAULT_AMOUNT
 		user.InitCount += 1
 		db.Save(user)
@@ -82,6 +90,10 @@ func (c *Command) Execute(db *gorm.DB) string {
 	case All:
 		var user User
 		db.Find(&user, "id = ?", author.ID)
+		if user.ID == "" {
+			return "```!생성을 먼저 진행해주세요```"
+		}
+
 		origin := user.Amount
 		if origin <= 0 {
 			return "파산했어요.. ```!파산```으로 회복하세요!"
@@ -104,7 +116,7 @@ func (c *Command) Execute(db *gorm.DB) string {
 
 		return message
 	default:
-		return "not found"
+		return "없는 명령어에요"
 	}
 }
 
