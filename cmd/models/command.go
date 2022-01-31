@@ -41,7 +41,7 @@ func (c *Command) Execute(db *gorm.DB) string {
 		}
 		return "어서오세요! 초기 자본금은 " + strconv.Itoa(DEFAULT_AMOUNT) + "입니다!"
 	case Gambling:
-		dividend, err := strconv.Atoi(c.Argument)
+		dividend, err := strconv.ParseInt(c.Argument, 10, 64)
 		if err != nil || dividend < 1000 {
 			return "최소 배팅금은 1,000부터 입니다!"
 		}
@@ -55,11 +55,11 @@ func (c *Command) Execute(db *gorm.DB) string {
 		origin := user.Amount
 		if origin <= 0 {
 			return "파산했어요.. ```!파산```으로 회복하세요!"
-		} else if origin < int64(dividend) {
+		} else if origin < dividend {
 			return "욕심쟁이, 소지금보다 배팅금이 크면 못해요!"
 		}
 
-		num := generator(origin)
+		num := int64(generator(origin))
 		amount := dividend * num
 
 		user.Amount += -int64(dividend) + int64(amount)
@@ -70,7 +70,7 @@ func (c *Command) Execute(db *gorm.DB) string {
 			"원금: " + humanize.Comma(origin) + "\n" +
 			"결과: " + humanize.Comma(int64(amount)) + "\n" +
 			"남은금액: " + humanize.Comma(user.Amount) + "\n" +
-			"배율: " + strconv.Itoa(num)
+			"배율: " + strconv.FormatInt(num, 10)
 
 		return message
 	case Bankrupt:
