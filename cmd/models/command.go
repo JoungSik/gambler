@@ -65,6 +65,9 @@ func (c *Command) Execute(db *gorm.DB) string {
 		user.Amount += -int64(dividend) + int64(amount)
 		db.Save(user)
 
+		history := History{UserID: user.ID, Invest: dividend, Principal: origin, Result: amount, Total: user.Amount, Diameter: num}
+		db.Create(&history)
+
 		message := "유저: " + user.Name + "\n" +
 			"투자금: " + humanize.Comma(int64(dividend)) + "\n" +
 			"원금: " + humanize.Comma(origin) + "\n" +
@@ -106,6 +109,9 @@ func (c *Command) Execute(db *gorm.DB) string {
 
 		user.Amount += -int64(origin) + int64(amount)
 		db.Save(user)
+
+		history := History{UserID: user.ID, Invest: origin, Principal: origin, Result: amount, Total: user.Amount, Diameter: num}
+		db.Create(&history)
 
 		message := "유저: " + user.Name + "\n" +
 			"투자금: " + humanize.Comma(int64(origin)) + "\n" +

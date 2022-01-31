@@ -9,6 +9,7 @@ type User struct {
 	Name      string
 	Amount    int64
 	InitCount int
+	Histories []History
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
