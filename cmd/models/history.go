@@ -8,6 +8,7 @@ type History struct {
 	Invest    int64
 	Principal int64
 	Result    int64
+	Tax       int64
 	Total     int64
 	Diameter  int64
 	CreatedAt time.Time `gorm:"autoCreateTime"`

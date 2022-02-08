@@ -61,17 +61,19 @@ func (c *Command) Execute(db *gorm.DB) string {
 
 		num := int64(generator(origin))
 		amount := dividend * num
+		tax := payTax(amount)
 
-		user.Amount += -int64(dividend) + int64(amount)
+		user.Amount += -int64(dividend) + int64(amount) - tax
 		db.Save(user)
 
-		history := History{UserID: user.ID, Invest: dividend, Principal: origin, Result: amount, Total: user.Amount, Diameter: num}
+		history := History{UserID: user.ID, Invest: dividend, Principal: origin, Result: amount, Tax: tax, Total: user.Amount, Diameter: num}
 		db.Create(&history)
 
 		message := "유저: " + user.Name + "\n" +
 			"투자금: " + humanize.Comma(int64(dividend)) + "\n" +
 			"원금: " + humanize.Comma(origin) + "\n" +
 			"결과: " + humanize.Comma(int64(amount)) + "\n" +
+			"세금: " + humanize.Comma(tax) + "\n" +
 			"남은금액: " + humanize.Comma(user.Amount) + "\n" +
 			"배율: " + strconv.FormatInt(num, 10)
 
@@ -106,17 +108,19 @@ func (c *Command) Execute(db *gorm.DB) string {
 
 		num := int64(generator(origin))
 		amount := origin * num
+		tax := payTax(amount)
 
-		user.Amount += -int64(origin) + int64(amount)
+		user.Amount += -int64(origin) + int64(amount) - tax
 		db.Save(user)
 
-		history := History{UserID: user.ID, Invest: origin, Principal: origin, Result: amount, Total: user.Amount, Diameter: num}
+		history := History{UserID: user.ID, Invest: origin, Principal: origin, Result: amount, Tax: tax, Total: user.Amount, Diameter: num}
 		db.Create(&history)
 
 		message := "유저: " + user.Name + "\n" +
 			"투자금: " + humanize.Comma(int64(origin)) + "\n" +
 			"원금: " + humanize.Comma(origin) + "\n" +
 			"결과: " + humanize.Comma(int64(amount)) + "\n" +
+			"세금: " + humanize.Comma(tax) + "\n" +
 			"남은금액: " + humanize.Comma(user.Amount) + "\n" +
 			"배율: " + strconv.FormatInt(num, 10)
 
@@ -184,4 +188,25 @@ func generator(origin int64) int {
 	}
 
 	return items[rand.Intn(max-min)]
+}
+
+func payTax(amount int64) int64 {
+	switch {
+	case amount <= 12000000:
+		return (int64((float64(amount) * 0.06)))
+	case amount > 12000000 && amount <= 46000000:
+		return (int64((float64(amount) * 0.15)) - 1080000)
+	case amount > 46000000 && amount <= 88000000:
+		return (int64((float64(amount) * 0.24)) - 5220000)
+	case amount > 88000000 && amount <= 150000000:
+		return (int64((float64(amount) * 0.35)) - 14900000)
+	case amount > 150000000 && amount <= 300000000:
+		return (int64((float64(amount) * 0.38)) - 19400000)
+	case amount > 300000000 && amount <= 500000000:
+		return (int64((float64(amount) * 0.4)) - 25400000)
+	case amount > 500000000:
+		return (int64((float64(amount) * 0.42)) - 35400000)
+	default:
+		return 0
+	}
 }
