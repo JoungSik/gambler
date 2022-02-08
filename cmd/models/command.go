@@ -192,7 +192,7 @@ func generator(origin int64) int {
 
 func payTax(amount int64) int64 {
 	switch {
-	case amount <= 12000000:
+	case amount > 0 && amount <= 12000000:
 		return (int64((float64(amount) * 0.06)))
 	case amount > 12000000 && amount <= 46000000:
 		return (int64((float64(amount) * 0.15)) - 1080000)
