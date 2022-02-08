@@ -57,6 +57,8 @@ func (c *Command) Execute(db *gorm.DB) string {
 			return "파산했어요.. ```!파산```으로 회복하세요!"
 		} else if origin < dividend {
 			return "욕심쟁이, 소지금보다 배팅금이 크면 못해요!"
+		} else if dividend < int64(float64(origin)*0.09) {
+			return "쫄?, 최소 금액은 " + humanize.Comma(int64(float64(origin)*0.09)) + " 입니다."
 		}
 
 		num := int64(generator(origin))
