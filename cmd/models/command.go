@@ -66,18 +66,38 @@ func (c *Command) Execute(db *gorm.DB) string {
 		tax := payTax(amount)
 
 		user.Amount += -int64(dividend) + int64(amount) - tax
+
+		var bonus int64
+		if user.Amount < 0 {
+			bonus = payTax(origin * (num * -1))
+			user.Amount += bonus
+		}
+
 		db.Save(user)
 
 		history := History{UserID: user.ID, Invest: dividend, Principal: origin, Result: amount, Tax: tax, Total: user.Amount, Diameter: num}
 		db.Create(&history)
 
-		message := "유저: " + user.Name + "\n" +
-			"투자금: " + humanize.Comma(int64(dividend)) + "\n" +
-			"원금: " + humanize.Comma(origin) + "\n" +
-			"결과: " + humanize.Comma(int64(amount)) + "\n" +
-			"세금: " + humanize.Comma(tax) + "\n" +
-			"남은금액: " + humanize.Comma(user.Amount) + "\n" +
-			"배율: " + strconv.FormatInt(num, 10)
+		var message string
+		if user.Amount > 0 {
+			message = "유저: " + user.Name + "\n" +
+				"투자금: " + humanize.Comma(int64(dividend)) + "\n" +
+				"원금: " + humanize.Comma(origin) + "\n" +
+				"결과: " + humanize.Comma(int64(amount)) + "\n" +
+				"세금: " + humanize.Comma(tax) + "\n" +
+				"남은금액: " + humanize.Comma(user.Amount) + "\n" +
+				"배율: " + strconv.FormatInt(num, 10)
+		} else {
+			message = "유저: " + user.Name + "\n" +
+				"투자금: " + humanize.Comma(int64(origin)) + "\n" +
+				"원금: " + humanize.Comma(origin) + "\n" +
+				"결과: " + humanize.Comma(int64(amount)) + "\n" +
+				"세금: " + humanize.Comma(tax) + "\n" +
+				"위로금: " + humanize.Comma(bonus) + "\n" +
+				"남은금액: " + humanize.Comma(user.Amount) + "\n" +
+				"배율: " + strconv.FormatInt(num, 10) + "\n\n" +
+				"ㅋ 감사합니다. 고객님, 설거지는 저쪽입니다."
+		}
 
 		return message
 	case Bankrupt:
@@ -113,18 +133,38 @@ func (c *Command) Execute(db *gorm.DB) string {
 		tax := payTax(amount)
 
 		user.Amount += -int64(origin) + int64(amount) - tax
+
+		var bonus int64
+		if user.Amount < 0 {
+			bonus = payTax(origin * (num * -1))
+			user.Amount += bonus
+		}
+
 		db.Save(user)
 
 		history := History{UserID: user.ID, Invest: origin, Principal: origin, Result: amount, Tax: tax, Total: user.Amount, Diameter: num}
 		db.Create(&history)
 
-		message := "유저: " + user.Name + "\n" +
-			"투자금: " + humanize.Comma(int64(origin)) + "\n" +
-			"원금: " + humanize.Comma(origin) + "\n" +
-			"결과: " + humanize.Comma(int64(amount)) + "\n" +
-			"세금: " + humanize.Comma(tax) + "\n" +
-			"남은금액: " + humanize.Comma(user.Amount) + "\n" +
-			"배율: " + strconv.FormatInt(num, 10)
+		var message string
+		if user.Amount > 0 {
+			message = "유저: " + user.Name + "\n" +
+				"투자금: " + humanize.Comma(int64(origin)) + "\n" +
+				"원금: " + humanize.Comma(origin) + "\n" +
+				"결과: " + humanize.Comma(int64(amount)) + "\n" +
+				"세금: " + humanize.Comma(tax) + "\n" +
+				"남은금액: " + humanize.Comma(user.Amount) + "\n" +
+				"배율: " + strconv.FormatInt(num, 10)
+		} else {
+			message = "유저: " + user.Name + "\n" +
+				"투자금: " + humanize.Comma(int64(origin)) + "\n" +
+				"원금: " + humanize.Comma(origin) + "\n" +
+				"결과: " + humanize.Comma(int64(amount)) + "\n" +
+				"세금: " + humanize.Comma(tax) + "\n" +
+				"위로금: " + humanize.Comma(bonus) + "\n" +
+				"남은금액: " + humanize.Comma(user.Amount) + "\n" +
+				"배율: " + strconv.FormatInt(num, 10) + "\n\n" +
+				"ㅋ 감사합니다. 고객님, 설거지는 저쪽입니다."
+		}
 
 		return message
 	default:
