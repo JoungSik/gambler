@@ -55,7 +55,7 @@ func (c *Command) Execute(db *gorm.DB) string {
 		resp, _ := client.Do(req)
 		defer resp.Body.Close()
 
-		newServer := Server{ID: server}
+		newServer := Server{ID: server, OwnerId: user}
 		db.Select("ID").Create(&newServer)
 
 		newAccount := Account{UserId: user, ServerId: server, Amount: DEFAULT_AMOUNT, InitCount: 0}
